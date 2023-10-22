@@ -8,9 +8,15 @@ import (
 func GetProjects(c *fiber.Ctx) error {
 	var myProjects []models.MyProjects
 
-	models.DB.Find(&myProjects)
+	limit := c.QueryInt("limit")
 
-	return c.Status(fiber.StatusOK).JSON(myProjects)
+	if limit != 0 {
+		models.DB.Limit(limit).Find(&myProjects)
+	} else {
+		models.DB.Find(&myProjects)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&myProjects)
 }
 
 func CreateProjects(c *fiber.Ctx) error {
@@ -32,9 +38,38 @@ func CreateProjects(c *fiber.Ctx) error {
 }
 
 func UpdateProjects(c *fiber.Ctx) error {
-	return nil
+	id := c.Params("id")
+	var myProjects models.MyProjects
+
+	if err := c.BodyParser(&myProjects); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if models.DB.Where("id = ?", id).Updates(&myProjects).RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Data Not Found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Update Success",
+		"data": myProjects,
+	})
 }
 
 func DeleteProjects(c *fiber.Ctx) error {
-	return nil
+	id := c.Params("id")
+	var myProjects models.MyProjects
+
+	if models.DB.Where("id = ?", id).Delete(&myProjects).RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Data Not Found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Success Delete",
+	})
 }
