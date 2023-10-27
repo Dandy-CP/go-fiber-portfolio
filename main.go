@@ -22,11 +22,16 @@ func main() {
 	})
 
 	myProjects.Get("/", myprojectscontroller.GetProjects)
-	myProjects.Post("/", myprojectscontroller.CreateProjects)
-	myProjects.Put("/:id", myprojectscontroller.UpdateProjects)
+
+	myProjects.Post("/", 
+		models.ValidateMyProjects, 
+			myprojectscontroller.CreateProjects)
+
+	myProjects.Put("/:id",
+		models.ValidateMyProjects,
+			myprojectscontroller.UpdateProjects)
+
 	myProjects.Delete("/:id", myprojectscontroller.DeleteProjects)
-
-
 
 	app.Listen(":8000")
 }
