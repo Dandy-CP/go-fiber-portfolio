@@ -22,15 +22,11 @@ func GetProjects(c *fiber.Ctx) error {
 func CreateProjects(c *fiber.Ctx) error {
 	var myProjects models.MyProjects
 
-	if err := c.BodyParser(&myProjects); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
-
 	if err := models.DB.Create(&myProjects).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
+			"Status":  fiber.StatusInternalServerError,
+			"Message": "error",
+			"Data":    err.Error(),
 		})
 	}
 
@@ -40,12 +36,6 @@ func CreateProjects(c *fiber.Ctx) error {
 func UpdateProjects(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var myProjects models.MyProjects
-
-	if err := c.BodyParser(&myProjects); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
-	}
 
 	if models.DB.Where("id = ?", id).Updates(&myProjects).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
