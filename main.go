@@ -1,10 +1,8 @@
 package main
 
 import (
-	blogcontroller "github.com/Dandy-CP/go-fiber-portfolio/controllers/blogController"
-	"github.com/Dandy-CP/go-fiber-portfolio/controllers/myprojectscontroller"
-	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
+	"github.com/Dandy-CP/go-fiber-portfolio/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,6 +13,7 @@ func main() {
 	api := app.Group("/api")
 	myProjects := api.Group("/my-projects")
 	blog := api.Group("/blog")
+	certificate := api.Group("/certificate")
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -24,17 +23,9 @@ func main() {
 		})
 	})
 
-	myProjects.Get("/", myprojectscontroller.GetProjects)
-	myProjects.Post("/", middleware.ValidateMyProjects, myprojectscontroller.CreateProjects)
-	myProjects.Put("/:id", middleware.ValidateMyProjects, myprojectscontroller.UpdateProjects)
-	myProjects.Delete("/:id", myprojectscontroller.DeleteProjects)
-
-	blog.Get("/", blogcontroller.GetListBlog)
-	blog.Get("/:id", blogcontroller.GetBlogDetail)
-	blog.Post("/", middleware.ValidateBlog, blogcontroller.CreateBlog)
-	blog.Put("/:id", middleware.ValidateBlog, blogcontroller.UpdateBlog)
-	blog.Delete("/:id", blogcontroller.DeleteBlog)
-
+	routes.MyProjectsRoutes(myProjects)
+	routes.BlogRoutes(blog)
+	routes.CertificateRoutes(certificate)
 
 	if err := app.Listen(":8000"); err != nil {
 		panic(err)
