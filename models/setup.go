@@ -20,8 +20,9 @@ func ConnectDB() {
 
 	log.Println("Connected Successfully to Database")
 	db.Logger = logger.Default.LogMode(logger.Info)
+
 	log.Println("Running Migrations")
-	db.AutoMigrate(&MyProjects{}, &Blog{})
+	db.AutoMigrate(&MyProjects{}, &Blog{}, &Certificate{})
 
 	DB = db
 }
