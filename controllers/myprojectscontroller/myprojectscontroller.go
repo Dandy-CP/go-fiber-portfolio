@@ -22,6 +22,14 @@ func GetProjects(c *fiber.Ctx) error {
 func CreateProjects(c *fiber.Ctx) error {
 	var myProjects models.MyProjects
 
+	if err := c.BodyParser(&myProjects); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"Status":  fiber.StatusBadRequest,
+			"Message": "error",
+			"Data":    err.Error(),
+		})
+	}
+
 	if err := models.DB.Create(&myProjects).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"Status":  fiber.StatusInternalServerError,
@@ -30,7 +38,11 @@ func CreateProjects(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(myProjects)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"Status": fiber.StatusOK,
+		"Message": "Success Create Project",
+		"Data": myProjects,
+	})
 }
 
 func UpdateProjects(c *fiber.Ctx) error {
