@@ -1,8 +1,11 @@
 package models
 
 import (
+	"log"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -15,7 +18,10 @@ func ConnectDB() {
 		panic(err)
 	}
 
-	db.AutoMigrate(&MyProjects{})
+	log.Println("Connected Successfully to Database")
+	db.Logger = logger.Default.LogMode(logger.Info)
+	log.Println("Running Migrations")
+	db.AutoMigrate(&MyProjects{}, &Blog{})
 
 	DB = db
 }
