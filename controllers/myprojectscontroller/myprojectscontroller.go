@@ -49,6 +49,14 @@ func UpdateProjects(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var myProjects models.MyProjects
 
+	if err := c.BodyParser(&myProjects); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"Status":  fiber.StatusBadRequest,
+			"Message": "error",
+			"Data":    err.Error(),
+		})
+	}
+
 	if models.DB.Where("id = ?", id).Updates(&myProjects).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Data Not Found",
