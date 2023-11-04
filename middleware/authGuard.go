@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Dandy-CP/go-fiber-portfolio/config"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -24,11 +25,12 @@ func AuthGuard(c *fiber.Ctx) error {
 		})
 	}
 
+	setup, _ := config.LoadConfig(".")
 	tokenByte, err := jwt.Parse(tokenString, func(jwtToken *jwt.Token) (interface{}, error) {
 		if _, ok := jwtToken.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %s", jwtToken.Header["alg"])
 		}
-		return []byte("nffhdufnxh44ffefs"), nil
+		return []byte(setup.JwtSecret), nil
 	})
 
 	if err != nil {
@@ -47,7 +49,7 @@ func AuthGuard(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	models.DB.First(&user, "id = ?", fmt.Sprint(claims["sub"]))
+	config.DB.First(&user, "id = ?", fmt.Sprint(claims["sub"]))
 
 	if user.ID.String() != claims["sub"] {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
