@@ -12,8 +12,9 @@ func main() {
 
 	api := app.Group("/api")
 	myProjects := api.Group("/my-projects")
-	blog := api.Group("/blog")
 	certificate := api.Group("/certificate")
+	blog := api.Group("/blog")
+	auth := api.Group("/auth")
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -26,6 +27,7 @@ func main() {
 	routes.MyProjectsRoutes(myProjects)
 	routes.BlogRoutes(blog)
 	routes.CertificateRoutes(certificate)
+	routes.AuthRoutes(auth)
 
 	if err := app.Listen(":8000"); err != nil {
 		panic(err)
