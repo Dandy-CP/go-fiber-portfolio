@@ -3,7 +3,7 @@ package models
 type (
 	Certificate struct {
 		Base
-		UrlPDF 					string		`validate:"required"`
-		ThumbnailImage 	string		`validate:"required"`
+		UrlPDF 					string		`json:"url_pdf" validate:"required"`
+		ThumbnailImage 	string		`json:"thumbnail_image" validate:"required"`
 	}
 )
