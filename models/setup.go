@@ -2,6 +2,7 @@ package models
 
 import (
 	"log"
+	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -12,17 +13,22 @@ var DB *gorm.DB
 
 func ConnectDB() {
 	dsn := "host=localhost user=postgres password= dbname=postgres port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic(err)
+		log.Fatal("Failed to connect to the Database! \n", err.Error())
+		os.Exit(1)
 	}
 
-	log.Println("Connected Successfully to Database")
 	db.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Println("Running Migrations")
-	db.AutoMigrate(&MyProjects{}, &Blog{}, &Certificate{})
+	err = db.AutoMigrate(&MyProjects{}, &Blog{}, &Certificate{}, &User{})
+	if err != nil {
+		log.Fatal("Migration Failed:  \n", err.Error())
+		os.Exit(1)
+	}
 
 	DB = db
+	log.Println("🚀 Connected Successfully to the Database")
 }
