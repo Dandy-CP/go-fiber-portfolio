@@ -10,12 +10,16 @@ func CertificateRoutes(certificate fiber.Router) {
 	certificate.Get("/", certificatecontroller.GetListCertificate)
 
 	certificate.Post("/",
+	middleware.AuthGuard,
 		middleware.ValidateCertificate,
 			certificatecontroller.CreateCertificate)
 
 	certificate.Put("/:id",
+	middleware.AuthGuard,
 		middleware.ValidateCertificate,
 			certificatecontroller.UpdateCertificate)
 
-	certificate.Delete("/:id", certificatecontroller.DeleteCertificate)
+	certificate.Delete("/:id",
+		middleware.AuthGuard,
+			certificatecontroller.DeleteCertificate)
 }

@@ -12,12 +12,16 @@ func BlogRoutes(blog fiber.Router) {
 	blog.Get("/:id", blogcontroller.GetBlogDetail)
 
 	blog.Post("/",
+	middleware.AuthGuard,
 		middleware.ValidateBlog,
 			blogcontroller.CreateBlog)
 
 	blog.Put("/:id",
+	middleware.AuthGuard,
 		middleware.ValidateBlog,
 			blogcontroller.UpdateBlog)
 
-	blog.Delete("/:id", blogcontroller.DeleteBlog)
+	blog.Delete("/:id",
+		middleware.AuthGuard,
+			blogcontroller.DeleteBlog)
 }
