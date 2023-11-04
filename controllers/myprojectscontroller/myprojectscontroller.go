@@ -2,22 +2,19 @@ package myprojectscontroller
 
 import (
 	"github.com/Dandy-CP/go-fiber-portfolio/config"
+	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetProjects(c *fiber.Ctx) error {
 	var myProjects []models.MyProjects
+	
+	valueInDB := config.DB.Find(&myProjects)
 
-	limit := c.QueryInt("limit")
+	result := middleware.Pagination.With(valueInDB).Request(c.Request()).Response(&[]models.MyProjects{})
 
-	if limit != 0 {
-		config.DB.Limit(limit).Find(&myProjects)
-	} else {
-		config.DB.Find(&myProjects)
-	}
-
-	return c.Status(fiber.StatusOK).JSON(&myProjects)
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
 func CreateProjects(c *fiber.Ctx) error {

@@ -2,21 +2,19 @@ package blogcontroller
 
 import (
 	"github.com/Dandy-CP/go-fiber-portfolio/config"
+	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetListBlog(c *fiber.Ctx) error {
 	var blogList []models.Blog
-	limit := c.QueryInt("limit")
 
-	if limit != 0 {
-		config.DB.Limit(limit).Find(&blogList)
-	} else {
-		config.DB.Find(&blogList)
-	}
+	valueInDB := config.DB.Find(&blogList)
 
-	return c.Status(fiber.StatusOK).JSON(&blogList)
+	result := middleware.Pagination.With(valueInDB).Request(c.Request()).Response(&[]models.Blog{})
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
 func GetBlogDetail(c *fiber.Ctx) error {

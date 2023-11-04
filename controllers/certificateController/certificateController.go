@@ -2,21 +2,19 @@ package certificatecontroller
 
 import (
 	"github.com/Dandy-CP/go-fiber-portfolio/config"
+	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetListCertificate(c *fiber.Ctx) error {
 	var certificateList []models.Certificate
-	limit := c.QueryInt("limit")
 
-	if limit != 0 {
-		config.DB.Limit(limit).Find(&certificateList)
-	} else {
-		config.DB.Find(&certificateList)
-	}
+	valueInDB := config.DB.Find(&certificateList)
 
-	return c.Status(fiber.StatusOK).JSON(&certificateList)
+	result := middleware.Pagination.With(valueInDB).Request(c.Request()).Response(&[]models.Certificate{})
+
+	return c.Status(fiber.StatusOK).JSON(result)
 }
 
 func CreateCertificate(c *fiber.Ctx) error {
