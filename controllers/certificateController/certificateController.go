@@ -1,6 +1,7 @@
 package certificatecontroller
 
 import (
+	"github.com/Dandy-CP/go-fiber-portfolio/config"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,9 +11,9 @@ func GetListCertificate(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit")
 
 	if limit != 0 {
-		models.DB.Limit(limit).Find(&certificateList)
+		config.DB.Limit(limit).Find(&certificateList)
 	} else {
-		models.DB.Find(&certificateList)
+		config.DB.Find(&certificateList)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(&certificateList)
@@ -29,7 +30,7 @@ func CreateCertificate(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := models.DB.Create(&certificate).Error; err != nil {
+	if err := config.DB.Create(&certificate).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"Status":  fiber.StatusInternalServerError,
 			"Message": "error",
@@ -56,7 +57,7 @@ func UpdateCertificate(c *fiber.Ctx) error {
 		})
 	}
 
-	if models.DB.Where("id = ?", id).Updates(&certificate).RowsAffected == 0 {
+	if config.DB.Where("id = ?", id).Updates(&certificate).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"Status":  fiber.StatusNotFound,
 			"message": "Data Not Found",
@@ -73,7 +74,7 @@ func DeleteCertificate(c *fiber.Ctx) error {
 	var certificate models.Certificate
 	id := c.Params("id")
 
-	if models.DB.Where("id = ?", id).Delete(&certificate).RowsAffected == 0 {
+	if config.DB.Where("id = ?", id).Delete(&certificate).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"Status":  fiber.StatusNotFound,
 			"message": "Data Not Found",

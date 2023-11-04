@@ -1,6 +1,7 @@
 package myprojectscontroller
 
 import (
+	"github.com/Dandy-CP/go-fiber-portfolio/config"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
 )
@@ -11,9 +12,9 @@ func GetProjects(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit")
 
 	if limit != 0 {
-		models.DB.Limit(limit).Find(&myProjects)
+		config.DB.Limit(limit).Find(&myProjects)
 	} else {
-		models.DB.Find(&myProjects)
+		config.DB.Find(&myProjects)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(&myProjects)
@@ -30,7 +31,7 @@ func CreateProjects(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := models.DB.Create(&myProjects).Error; err != nil {
+	if err := config.DB.Create(&myProjects).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"Status":  fiber.StatusInternalServerError,
 			"Message": "error",
@@ -57,7 +58,7 @@ func UpdateProjects(c *fiber.Ctx) error {
 		})
 	}
 
-	if models.DB.Where("id = ?", id).Updates(&myProjects).RowsAffected == 0 {
+	if config.DB.Where("id = ?", id).Updates(&myProjects).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Data Not Found",
 		})
@@ -73,7 +74,7 @@ func DeleteProjects(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var myProjects models.MyProjects
 
-	if models.DB.Where("id = ?", id).Delete(&myProjects).RowsAffected == 0 {
+	if config.DB.Where("id = ?", id).Delete(&myProjects).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"message": "Data Not Found",
 		})

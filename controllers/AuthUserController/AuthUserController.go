@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Dandy-CP/go-fiber-portfolio/config"
 	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +23,7 @@ func AuthLogin(c *fiber.Ctx) error {
 		})
 	}
 
-	if models.DB.Where("Username = ?", body.Username).Find(&userInDB).RowsAffected == 0 {
+	if config.DB.Where("Username = ?", body.Username).Find(&userInDB).RowsAffected == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"Status": fiber.StatusBadRequest,
 			"message": "Wrong Password Or Username",
@@ -38,14 +39,16 @@ func AuthLogin(c *fiber.Ctx) error {
 		})
 	}
 
+	setup, _ := config.LoadConfig(".")
+
 	tokenByte := jwt.New(jwt.SigningMethodHS256)
 	now := time.Now().UTC()
 	claims := tokenByte.Claims.(jwt.MapClaims)
 	claims["sub"] = userInDB.ID
-	claims["exp"] = now.Add(time.Hour * 24).Unix()
+	claims["exp"] = now.Add(setup.JwtExpiresIn).Unix()
 	claims["iat"] = now.Unix()
 	claims["nbf"] = now.Unix()
-	tokenString, err := tokenByte.SignedString([]byte("nffhdufnxh44ffefs"))
+	tokenString, err := tokenByte.SignedString([]byte(setup.JwtSecret))
 
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -53,6 +56,12 @@ func AuthLogin(c *fiber.Ctx) error {
 			"message": fmt.Sprintf("generating JWT Token failed: %v", err),
 		})
 	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "token",
+		Value:    tokenString,
+		MaxAge:   setup.JwtMaxAge * 60,
+	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"id": userInDB.ID,
@@ -72,7 +81,7 @@ func AuthSignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	if models.DB.Where("Username = ?", user.Username).Find(&user).RowsAffected != 0 {
+	if config.DB.Where("Username = ?", user.Username).Find(&user).RowsAffected != 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"Status": fiber.StatusBadRequest,
 			"message": "Username Has been used",
@@ -88,10 +97,12 @@ func AuthSignUp(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := models.DB.Create(&models.User{
+	newUser := models.User{
 		Username: user.Username,
 		Password: valueHash,
-	}).Error; err != nil {
+	}
+
+	if err := config.DB.Create(&newUser).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"Status":  fiber.StatusInternalServerError,
 			"Message": "error",
@@ -102,5 +113,18 @@ func AuthSignUp(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"Status": fiber.StatusOK,
 		"Message": "Success Register",
+	})
+}
+
+func LogoutUser(c *fiber.Ctx) error {
+	expired := time.Now().Add(-time.Hour * 24)
+
+	c.Cookie(&fiber.Cookie{
+		Name:    "token",
+		Value:   "",
+		Expires: expired,
+	})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"status": "success log out",
 	})
 }
