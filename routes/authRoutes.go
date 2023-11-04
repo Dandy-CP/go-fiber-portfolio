@@ -14,4 +14,8 @@ func AuthRoutes(auth fiber.Router) {
 	auth.Post("/register",
 		middleware.ValidateAuth,
 			authusercontroller.AuthSignUp)
+
+	auth.Get("/logout",
+		middleware.AuthGuard,
+			authusercontroller.LogoutUser)
 }
