@@ -1,6 +1,8 @@
 package blogcontroller
 
 import (
+	"strings"
+
 	"github.com/Dandy-CP/go-fiber-portfolio/config"
 	"github.com/Dandy-CP/go-fiber-portfolio/middleware"
 	"github.com/Dandy-CP/go-fiber-portfolio/models"
@@ -22,6 +24,22 @@ func GetBlogDetail(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	if config.DB.Where("id = ?", id).Find(&blogDetail).RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"Status":  fiber.StatusNotFound,
+			"message": "Data Not Found",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(&blogDetail)
+}
+
+func GetBlogByTitle(c *fiber.Ctx) error {
+	var blogDetail models.Blog
+	blogTitle := c.Params("title")
+
+	valueTitle := strings.Replace(blogTitle, "-", " ", -1)
+
+	if config.DB.Where("title = ?", valueTitle).Find(&blogDetail).RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"Status":  fiber.StatusNotFound,
 			"message": "Data Not Found",
