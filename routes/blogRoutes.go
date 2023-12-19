@@ -11,6 +11,8 @@ func BlogRoutes(blog fiber.Router) {
 
 	blog.Get("/:id", blogcontroller.GetBlogDetail)
 
+	blog.Get("/title/:title", blogcontroller.GetBlogByTitle)
+
 	blog.Post("/",
 	middleware.AuthGuard,
 		middleware.ValidateBlog,
